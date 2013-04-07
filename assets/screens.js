@@ -21,6 +21,7 @@ Game.Screen.startScreen = {
 
 // Define our playing screen
 Game.Screen.playScreen = {
+    _map: null,
     _centerX: 0,
     _centerY: 0,
     enter: function() {  
