@@ -83,20 +83,29 @@ Game.Mixins.FungusActor = {
     }
 }
 
+// This signifies our entity can attack basic destructible enities
 Game.Mixins.SimpleAttacker = {
     name: 'SimpleAttacker',
     groupName: 'Attacker',
     attack: function(target) {
         // Only remove the entity if they were attackable
-        if (target.hasMixin('Attackable')) {
-            this.getMap().removeEntity(target);
+        if (target.hasMixin('Destructible')) {
+            target.takeDamage(this, 1);
         }
     }
 }
 
-// This mixin signifies an entity can be attacked
-Game.Mixins.Attackable = {
-    name: 'Attackable'
+// This mixin signifies an entity can take damage and be destroyed
+Game.Mixins.Destructible = {
+    name: 'Destructible',
+    init: function() {
+        this._hp = 1;
+    },
+    takeDamage: function(attacker, damage) {
+        this._hp -= damage;
+        // If have 0 or less HP, then remove ourseles from the map
+        this.getMap().removeEntity(this);
+    }
 }
 
 // Player template
@@ -104,11 +113,11 @@ Game.PlayerTemplate = {
     character: '@',
     foreground: 'white',
     mixins: [Game.Mixins.Moveable, Game.Mixins.PlayerActor,
-             Game.Mixins.SimpleAttacker, Game.Mixins.Attackable]
+             Game.Mixins.SimpleAttacker, Game.Mixins.Destructible]
 }
 // Fungus template
 Game.FungusTemplate = {
     character: 'F',
     foreground: 'green',
-    mixins: [Game.Mixins.FungusActor, Game.Mixins.Attackable]
+    mixins: [Game.Mixins.FungusActor, Game.Mixins.Destructible]
 }
