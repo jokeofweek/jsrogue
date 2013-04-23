@@ -13,10 +13,10 @@ Game.Map = function(tiles, player) {
     // add the player
     this.addEntityAtRandomPosition(player);
     // add random fungi
-    for (var i = 0; i < 1000; i++) {
+    for (var i = 0; i < 50; i++) {
         this.addEntityAtRandomPosition(new Game.Entity(Game.FungusTemplate));
     }
-};
+}
 
 // Standard getters
 Game.Map.prototype.getWidth = function() {
@@ -44,14 +44,19 @@ Game.Map.prototype.dig = function(x, y) {
     }
 }
 
+Game.Map.prototype.isEmptyFloor = function(x, y) {
+    // Check if the tile is floor and also has no entity
+    return this.getTile(x, y) == Game.Tile.floorTile &&
+           !this.getEntityAt(x, y);
+}
+
 Game.Map.prototype.getRandomFloorPosition = function() {
     // Randomly generate a tile which is a floor
     var x, y;
     do {
         x = Math.floor(Math.random() * this._width);
         y = Math.floor(Math.random() * this._width);
-    } while(this.getTile(x, y) != Game.Tile.floorTile ||
-            this.getEntityAt(x, y));
+    } while(!this.isEmptyFloor(x, y));
     return {x: x, y: y};
 }
 
@@ -94,4 +99,18 @@ Game.Map.prototype.addEntityAtRandomPosition = function(entity) {
     entity.setX(position.x);
     entity.setY(position.y);
     this.addEntity(entity);
+}
+
+Game.Map.prototype.removeEntity = function(entity) {
+    // Find the entity in the list of entities if it is present
+    for (var i = 0; i < this._entities.length; i++) {
+        if (this._entities[i] == entity) {
+            this._entities.splice(i, 1);
+            break;
+        }
+    }
+    // If the entity is an actor, remove them from the scheduler
+    if (entity.hasMixin('Actor')) {
+        this._scheduler.remove(entity);
+    }
 }
