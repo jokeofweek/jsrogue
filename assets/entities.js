@@ -104,7 +104,9 @@ Game.Mixins.Destructible = {
     takeDamage: function(attacker, damage) {
         this._hp -= damage;
         // If have 0 or less HP, then remove ourseles from the map
-        this.getMap().removeEntity(this);
+        if (this._hp <= 0) {
+            this.getMap().removeEntity(this);
+        }
     }
 }
 
