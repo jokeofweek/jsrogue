@@ -45,7 +45,9 @@ Game.Mixins.PlayerActor = {
         Game.refresh();
         // Lock the engine and wait asynchronously
         // for the player to press a key.
-        this.getMap().getEngine().lock();        
+        this.getMap().getEngine().lock();
+        // Clear the message queue
+        this.clearMessages();
     }
 }
 
@@ -76,6 +78,10 @@ Game.Mixins.FungusActor = {
                         entity.setY(this.getY() + yOffset);
                         this.getMap().addEntity(entity);
                         this._growthsRemaining--;
+                        // Send a message nearby!
+                        Game.sendMessageNearby(this.getMap(),
+                            entity.getX(), entity.getY(),
+                            'The fungus is spreading!');
                     }
                 }
             }
@@ -84,13 +90,30 @@ Game.Mixins.FungusActor = {
 }
 
 // This signifies our entity can attack basic destructible enities
-Game.Mixins.SimpleAttacker = {
-    name: 'SimpleAttacker',
+Game.Mixins.Attacker = {
+    name: 'Attacker',
     groupName: 'Attacker',
+    init: function(template) {
+        this._attackValue = template['attackValue'] || 1;
+    },
+    getAttackValue: function() {
+        return this._attackValue;
+    },
     attack: function(target) {
-        // Only remove the entity if they were attackable
+        // If the target is destructible, calculate the damage
+        // based on attack and defense value
         if (target.hasMixin('Destructible')) {
-            target.takeDamage(this, 1);
+            var attack = this.getAttackValue();
+            var defense = target.getDefenseValue();
+            var max = Math.max(0, attack - defense);
+            var damage = 1 + Math.floor(Math.random() * max);
+
+            Game.sendMessage(this, 'You strike the %s for %d damage!', 
+                [target.getName(), damage]);
+            Game.sendMessage(target, 'The %s strikes you for %d damage!', 
+                [this.getName(), damage]);
+
+            target.takeDamage(this, damage);
         }
     }
 }
@@ -98,28 +121,96 @@ Game.Mixins.SimpleAttacker = {
 // This mixin signifies an entity can take damage and be destroyed
 Game.Mixins.Destructible = {
     name: 'Destructible',
-    init: function() {
-        this._hp = 1;
+    init: function(template) {
+        this._maxHp = template['maxHp'] || 10;
+        // We allow taking in health from the template incase we want
+        // the entity to start with a different amount of HP than the 
+        // max specified.
+        this._hp = template['hp'] || this._maxHp;
+        this._defenseValue = template['defenseValue'] || 0;
+    },
+    getDefenseValue: function() {
+        return this._defenseValue;
+    },
+    getHp: function() {
+        return this._hp;
+    },
+    getMaxHp: function() {
+        return this._maxHp;
     },
     takeDamage: function(attacker, damage) {
         this._hp -= damage;
         // If have 0 or less HP, then remove ourseles from the map
         if (this._hp <= 0) {
+            Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
+            Game.sendMessage(this, 'You die!');
             this.getMap().removeEntity(this);
         }
     }
 }
 
+Game.Mixins.MessageRecipient = {
+    name: 'MessageRecipient',
+    init: function(template) {
+        this._messages = [];
+    },
+    receiveMessage: function(message) {
+        this._messages.push(message);
+    },
+    getMessages: function() {
+        return this._messages;
+    },
+    clearMessages: function() {
+        this._messages = [];
+    }
+}
+
+// Message sending functions
+Game.sendMessage = function(recipient, message, args) {
+    // Make sure the recipient can receive the message 
+    // before doing any work.
+    if (recipient.hasMixin(Game.Mixins.MessageRecipient)) {
+        // If args were passed, then we format the message, else
+        // no formatting is necessary
+        if (args) {
+            message = vsprintf(message, args);
+        }
+        recipient.receiveMessage(message);
+    }
+}
+Game.sendMessageNearby = function(map, centerX, centerY, message, args) {
+    // If args were passed, then we format the message, else
+    // no formatting is necessary
+    if (args) {
+        message = vsprintf(message, args);
+    }
+    // Get the nearby entities
+    entities = map.getEntitiesWithinRadius(centerX, centerY, 5);
+    // Iterate through nearby entities, sending the message if
+    // they can receive it.
+    for (var i = 0; i < entities.length; i++) {
+        if (entities[i].hasMixin(Game.Mixins.MessageRecipient)) {
+            entities[i].receiveMessage(message);
+        }
+    }
+}
+
+
 // Player template
 Game.PlayerTemplate = {
     character: '@',
     foreground: 'white',
+    maxHp: 40,
+    attackValue: 10,
     mixins: [Game.Mixins.Moveable, Game.Mixins.PlayerActor,
-             Game.Mixins.SimpleAttacker, Game.Mixins.Destructible]
+             Game.Mixins.Attacker, Game.Mixins.Destructible,
+             Game.Mixins.MessageRecipient]
 }
 // Fungus template
 Game.FungusTemplate = {
+    name: 'fungus',
     character: 'F',
     foreground: 'green',
+    maxHp: 10,
     mixins: [Game.Mixins.FungusActor, Game.Mixins.Destructible]
 }
