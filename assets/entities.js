@@ -50,7 +50,7 @@ Game.Mixins.Moveable = {
         }
         return false;
     }
-}
+};
 
 
 // Main player's actor mixin
@@ -66,7 +66,7 @@ Game.Mixins.PlayerActor = {
         // Clear the message queue
         this.clearMessages();
     }
-}
+};
 
 Game.Mixins.FungusActor = {
     name: 'FungusActor',
@@ -104,7 +104,7 @@ Game.Mixins.FungusActor = {
             }
         }
     }
-}
+};
 
 // This signifies our entity can attack basic destructible enities
 Game.Mixins.Attacker = {
@@ -133,7 +133,7 @@ Game.Mixins.Attacker = {
             target.takeDamage(this, damage);
         }
     }
-}
+};
 
 // This mixin signifies an entity can take damage and be destroyed
 Game.Mixins.Destructible = {
@@ -164,7 +164,7 @@ Game.Mixins.Destructible = {
             this.getMap().removeEntity(this);
         }
     }
-}
+};
 
 Game.Mixins.MessageRecipient = {
     name: 'MessageRecipient',
@@ -180,7 +180,19 @@ Game.Mixins.MessageRecipient = {
     clearMessages: function() {
         this._messages = [];
     }
-}
+};
+
+// This signifies our entity posseses a field of vision of a given radius.
+Game.Mixins.Sight = {
+    name: 'Sight',
+    groupName: 'Sight',
+    init: function(template) {
+        this._sightRadius = template['sightRadius'] || 5;
+    },
+    getSightRadius: function() {
+        return this._sightRadius;
+    }
+};
 
 // Message sending functions
 Game.sendMessage = function(recipient, message, args) {
@@ -219,10 +231,12 @@ Game.PlayerTemplate = {
     foreground: 'white',
     maxHp: 40,
     attackValue: 10,
+    sightRadius: 6,
     mixins: [Game.Mixins.Moveable, Game.Mixins.PlayerActor,
              Game.Mixins.Attacker, Game.Mixins.Destructible,
-             Game.Mixins.MessageRecipient]
-}
+             Game.Mixins.Sight, Game.Mixins.MessageRecipient]
+};
+
 // Fungus template
 Game.FungusTemplate = {
     name: 'fungus',
@@ -230,4 +244,4 @@ Game.FungusTemplate = {
     foreground: 'green',
     maxHp: 10,
     mixins: [Game.Mixins.FungusActor, Game.Mixins.Destructible]
-}
+};
