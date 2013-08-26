@@ -50,25 +50,34 @@ Game.Screen.playScreen = {
         topLeftY = Math.min(topLeftY, this._map.getHeight() - screenHeight);
         // This object will keep track of all visible map cells
         var visibleCells = {};
+        // Store this._map and player's z to prevent losing it in callbacks
+        var map = this._map;
+        var currentDepth = this._player.getZ();
         // Find all visible cells and update the object
-        this._map.getFov(this._player.getZ()).compute(
+        map.getFov(currentDepth).compute(
             this._player.getX(), this._player.getY(), 
             this._player.getSightRadius(), 
             function(x, y, radius, visibility) {
                 visibleCells[x + "," + y] = true;
+                // Mark cell as explored
+                map.setExplored(x, y, currentDepth, true);
             });
-        // Iterate through all visible map cells
+        // Render the explored map cells
         for (var x = topLeftX; x < topLeftX + screenWidth; x++) {
             for (var y = topLeftY; y < topLeftY + screenHeight; y++) {
-                if (visibleCells[x + ',' + y]) {
+                if (map.isExplored(x, y, currentDepth)) {
                     // Fetch the glyph for the tile and render it to the screen
                     // at the offset position.
-                    var tile = this._map.getTile(x, y, this._player.getZ());
+                    var tile = this._map.getTile(x, y, currentDepth);
+                    // The foreground color becomes dark gray if the tile has been
+                    // explored but is not visible
+                    var foreground = visibleCells[x + ',' + y] ?
+                        tile.getForeground() : 'darkGray';
                     display.draw(
                         x - topLeftX,
                         y - topLeftY,
                         tile.getChar(), 
-                        tile.getForeground(), 
+                        foreground, 
                         tile.getBackground());
                 }
             }
