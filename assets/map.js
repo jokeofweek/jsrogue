@@ -20,7 +20,7 @@ Game.Map = function(tiles, player) {
             this.addEntityAtRandomPosition(new Game.Entity(Game.FungusTemplate), z);
         }
     }
-}
+};
 
 // Standard getters
 Game.Map.prototype.getDepth = function() {
@@ -50,13 +50,13 @@ Game.Map.prototype.dig = function(x, y, z) {
     if (this.getTile(x, y, z).isDiggable()) {
         this._tiles[z][x][y] = Game.Tile.floorTile;
     }
-}
+};
 
 Game.Map.prototype.isEmptyFloor = function(x, y, z) {
     // Check if the tile is floor and also has no entity
     return this.getTile(x, y, z) == Game.Tile.floorTile &&
            !this.getEntityAt(x, y, z);
-}
+};
 
 Game.Map.prototype.setupFov = function() {
     // Keep this in 'map' variable so that we don't lose it.
@@ -75,18 +75,18 @@ Game.Map.prototype.setupFov = function() {
                 }, {topology: 4}));
         })();
     }
-}
+};
 
 Game.Map.prototype.getFov = function(depth) {
     return this._fov[depth];
-}
+};
 
 Game.Map.prototype.getEngine = function() {
     return this._engine;
-}
+};
 Game.Map.prototype.getEntities = function() {
     return this._entities;
-}
+};
 Game.Map.prototype.getEntityAt = function(x, y, z){
     // Iterate through all entities searching for one with
     // matching position
@@ -97,7 +97,7 @@ Game.Map.prototype.getEntityAt = function(x, y, z){
         }
     }
     return false;
-}
+};
 Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY,
                                                       centerZ, radius) {
     results = [];
@@ -117,7 +117,7 @@ Game.Map.prototype.getEntitiesWithinRadius = function(centerX, centerY,
         }
     }
     return results;
-}
+};
 
 Game.Map.prototype.addEntity = function(entity) {
     // Make sure the entity's position is within bounds
@@ -135,7 +135,7 @@ Game.Map.prototype.addEntity = function(entity) {
     if (entity.hasMixin('Actor')) {
        this._scheduler.add(entity, true);
     }
-}
+};
 
 Game.Map.prototype.getRandomFloorPosition = function(z) {
     // Randomly generate a tile which is a floor
@@ -145,7 +145,7 @@ Game.Map.prototype.getRandomFloorPosition = function(z) {
         y = Math.floor(Math.random() * this._height);
     } while(!this.isEmptyFloor(x, y, z));
     return {x: x, y: y, z: z};
-}
+};
 
 Game.Map.prototype.addEntityAtRandomPosition = function(entity, z) {
     var position = this.getRandomFloorPosition(z);
@@ -153,7 +153,7 @@ Game.Map.prototype.addEntityAtRandomPosition = function(entity, z) {
     entity.setY(position.y);
     entity.setZ(position.z);
     this.addEntity(entity);
-}
+};
 
 Game.Map.prototype.removeEntity = function(entity) {
     // Find the entity in the list of entities if it is present
@@ -167,4 +167,4 @@ Game.Map.prototype.removeEntity = function(entity) {
     if (entity.hasMixin('Actor')) {
         this._scheduler.remove(entity);
     }
-}
+};
