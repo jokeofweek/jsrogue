@@ -1,20 +1,20 @@
 Game.Map = function(tiles, player) {
     this._tiles = tiles;
-    // cache dimensions
+    // Cache dimensions
     this._depth = tiles.length
     this._width = tiles[0].length;
     this._height = tiles[0][0].length;
-    // setup the field of visions
+    // Setup the field of visions
     this._fov = [];
     this.setupFov();
-    // create a list which will hold the entities
+    // Create a list which will hold the entities
     this._entities = [];
-    // create the engine and scheduler
+    // Create the engine and scheduler
     this._scheduler = new ROT.Scheduler.Simple();
     this._engine = new ROT.Engine(this._scheduler);
-    // add the player
+    // Add the player
     this.addEntityAtRandomPosition(player, 0);
-    // add random fungi
+    // Add random fungi
     for (var z = 0; z < this._depth; z++) {
         for (var i = 0; i < 25; i++) {
             this.addEntityAtRandomPosition(new Game.Entity(Game.FungusTemplate), z);
