@@ -17,7 +17,7 @@ Game.Screen.startScreen = {
             }
         }
     }
-}
+};
 
 // Define our playing screen
 Game.Screen.playScreen = {
@@ -155,7 +155,7 @@ Game.Screen.playScreen = {
         // Try to move to the new cell
         this._player.tryMove(newX, newY, newZ, this._map);
     }
-}
+};
 
 // Define our winning screen
 Game.Screen.winScreen = {
@@ -175,7 +175,7 @@ Game.Screen.winScreen = {
     handleInput: function(inputType, inputData) {
         // Nothing to do here      
     }
-}
+};
 
 // Define our winning screen
 Game.Screen.loseScreen = {
@@ -190,4 +190,4 @@ Game.Screen.loseScreen = {
     handleInput: function(inputType, inputData) {
         // Nothing to do here      
     }
-}
+};

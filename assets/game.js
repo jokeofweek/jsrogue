@@ -55,7 +55,7 @@ var Game =  {
             this.refresh();
         }
     }
-}
+};
 
 window.onload = function() {
     // Check if rot.js can work on this browser
@@ -69,4 +69,4 @@ window.onload = function() {
         // Load the start screen
         Game.switchScreen(Game.Screen.startScreen);
     }
-}
+};

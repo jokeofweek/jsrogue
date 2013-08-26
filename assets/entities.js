@@ -206,7 +206,7 @@ Game.sendMessage = function(recipient, message, args) {
         }
         recipient.receiveMessage(message);
     }
-}
+};
 Game.sendMessageNearby = function(map, centerX, centerY, centerZ, message, args) {
     // If args were passed, then we format the message, else
     // no formatting is necessary
@@ -222,7 +222,7 @@ Game.sendMessageNearby = function(map, centerX, centerY, centerZ, message, args)
             entities[i].receiveMessage(message);
         }
     }
-}
+};
 
 
 // Player template

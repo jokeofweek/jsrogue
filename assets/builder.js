@@ -26,16 +26,16 @@ Game.Builder = function(width, height, depth) {
 
 Game.Builder.prototype.getTiles = function () {
     return this._tiles;
-}
+};
 Game.Builder.prototype.getDepth = function () {
     return this._depth;
-}
+};
 Game.Builder.prototype.getWidth = function () {
     return this._width;
-}
+};
 Game.Builder.prototype.getHeight = function () {
     return this._height;
-}
+};
 
 Game.Builder.prototype._generateLevel = function() {
     // Create the empty map
@@ -74,7 +74,7 @@ Game.Builder.prototype._canFillRegion = function(x, y, z) {
     }
     // Make sure the tile is walkable
     return this._tiles[z][x][y].isWalkable();
-}
+};
 
 Game.Builder.prototype._fillRegion = function(region, x, y, z) {
     var tilesFilled = 1;
@@ -102,7 +102,7 @@ Game.Builder.prototype._fillRegion = function(region, x, y, z) {
 
     }
     return tilesFilled;
-}
+};
 
 // This removes all tiles at a given depth level with a region number.
 // It fills the tiles with a wall tile.
@@ -116,7 +116,7 @@ Game.Builder.prototype._removeRegion = function(region, z) {
             }
         }
     }
-}
+};
 
 // This sets up the regions for a given depth level.
 Game.Builder.prototype._setupRegions = function(z) {
@@ -138,7 +138,7 @@ Game.Builder.prototype._setupRegions = function(z) {
             }
         }
     }
-}
+};
 
 // This fetches a list of points that overlap between one
 // region at a given depth level and a region at a level beneath it.
@@ -160,7 +160,7 @@ Game.Builder.prototype._findRegionOverlaps = function(z, r1, r2) {
     }
     // We shuffle the list of matches to prevent bias
     return matches.randomize();
-}
+};
 
 // This tries to connect two regions by calculating 
 // where they overlap and adding stairs
@@ -175,7 +175,7 @@ Game.Builder.prototype._connectRegions = function(z, r1, r2) {
     this._tiles[z][point.x][point.y] = Game.Tile.stairsDownTile;
     this._tiles[z+1][point.x][point.y] = Game.Tile.stairsUpTile;
     return true;
-}
+};
 
 // This tries to connect all regions for each depth level,
 // starting from the top most depth level.
@@ -203,4 +203,4 @@ Game.Builder.prototype._connectAllRegions = function() {
             }
         }
     }
-}
+};
