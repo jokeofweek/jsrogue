@@ -45,8 +45,9 @@ Game.Mixins.FungusActor = {
                     if (this.getMap().isEmptyFloor(this.getX() + xOffset,
                                                    this.getY() + yOffset,
                                                    this.getZ())) {
-                        var entity = new Game.Entity(Game.FungusTemplate);
-                        entity.setPosition(this.getX() + xOffset, this.getY() + yOffset, this.getZ());
+                        var entity = Game.EntityRepository.create('fungus');
+                        entity.setPosition(this.getX() + xOffset, this.getY() + yOffset, 
+                            this.getZ());
                         this.getMap().addEntity(entity);
                         this._growthsRemaining--;
                         // Send a message nearby!
@@ -198,6 +199,77 @@ Game.sendMessageNearby = function(map, centerX, centerY, centerZ, message, args)
     }
 };
 
+Game.Mixins.InventoryHolder = {
+    name: 'InventoryHolder',
+    init: function(template) {
+        // Default to 10 inventory slots.
+        var inventorySlots = template['inventorySlots'] || 10;
+        // Set up an empty inventory.
+        this._items = new Array(inventorySlots);
+    },
+    getItems: function() {
+        return this._items;
+    },
+    getItem: function(i) {
+        return this._items[i];
+    },
+    addItem: function(item) {
+        // Try to find a slot, returning true only if we could add the item.
+        for (var i = 0; i < this._items.length; i++) {
+            if (!this._items[i]) {
+                this._items[i] = item;
+                return true;
+            }
+        }
+        return false;
+    },
+    removeItem: function(i) {
+        // Simply clear the inventory slot.
+        this._items[i] = null;
+    },
+    canAddItem: function() {
+        // Check if we have an empty slot.
+        for (var i = 0; i < this._items.length; i++) {
+            if (!this._items[i]) {
+                return true;
+            }
+        }
+        return false;
+    },
+    pickupItems: function(indices) {
+        // Allows the user to pick up items from the map, where indices is
+        // the indices for the array returned by map.getItemsAt
+        var mapItems = this._map.getItemsAt(this.getX(), this.getY(), this.getZ());
+        var added = 0;
+        // Iterate through all indices.
+        for (var i = 0; i < indices.length; i++) {
+            // Try to add the item. If our inventory is not full, then splice the 
+            // item out of the list of items. In order to fetch the right item, we
+            // have to offset the number of items already added.
+            if (this.addItem(mapItems[indices[i]  - added])) {
+                mapItems.splice(indices[i] - added, 1);
+                added++;
+            } else {
+                // Inventory is full
+                break;
+            }
+        }
+        // Update the map items
+        this._map.setItemsAt(this.getX(), this.getY(), this.getZ(), mapItems);
+        // Return true only if we added all items
+        return added === indices.length;
+    },
+    dropItem: function(i) {
+        // Drops an item to the current map tile
+        if (this._items[i]) {
+            if (this._map) {
+                this._map.addItem(this.getX(), this.getY(), this.getZ(), this._items[i]);
+            }
+            this.removeItem(i);      
+        }
+    }
+};
+
 
 // Player template
 Game.PlayerTemplate = {
@@ -206,8 +278,10 @@ Game.PlayerTemplate = {
     maxHp: 40,
     attackValue: 10,
     sightRadius: 6,
+    inventorySlots: 22,
     mixins: [Game.Mixins.PlayerActor,
              Game.Mixins.Attacker, Game.Mixins.Destructible,
+             Game.Mixins.InventoryHolder,
              Game.Mixins.Sight, Game.Mixins.MessageRecipient]
 };
 
