@@ -6,11 +6,16 @@ Game.EntityMixins.PlayerActor = {
     name: 'PlayerActor',
     groupName: 'Actor',
     act: function() {
+        if (this._acting) {
+            return;
+        }
+        this._acting = true;
+        this.addTurnHunger();
         // Detect if the game is over
-        if (this.getHp() < 1) {
+        if (!this.isAlive()) {
             Game.Screen.playScreen.setGameEnded(true);
             // Send a last message to the player
-            Game.sendMessage(this, 'You have died... Press [Enter] to continue!');
+            Game.sendMessage(this, 'Press [Enter] to continue!');
         }
         // Re-render the screen
         Game.refresh();
@@ -19,6 +24,7 @@ Game.EntityMixins.PlayerActor = {
         this.getMap().getEngine().lock();
         // Clear the message queue
         this.clearMessages();
+        this._acting = false;
     }
 };
 
@@ -131,12 +137,11 @@ Game.EntityMixins.Destructible = {
         // If have 0 or less HP, then remove ourseles from the map
         if (this._hp <= 0) {
             Game.sendMessage(attacker, 'You kill the %s!', [this.getName()]);
-            // Check if the player died, and if so call their act method to prompt the user.
-            if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
-                this.act();
-            } else {
-                this.getMap().removeEntity(this);
+            // If the entity is a corpse dropper, try to add a corpse
+            if (this.hasMixin(Game.EntityMixins.CorpseDropper)) {
+                this.tryDropCorpse();
             }
+            this.kill();
         }
     }
 };
@@ -266,6 +271,67 @@ Game.EntityMixins.InventoryHolder = {
                 this._map.addItem(this.getX(), this.getY(), this.getZ(), this._items[i]);
             }
             this.removeItem(i);      
+        }
+    }
+};
+
+Game.EntityMixins.FoodConsumer = {
+    name: 'FoodConsumer',
+    init: function(template) {
+        this._maxFullness = template['maxFullness'] || 1000;
+        // Start halfway to max fullness if no default value
+        this._fullness = template['fullness'] || (this._maxFullness / 2);
+        // Number of points to decrease fullness by every turn.
+        this._fullnessDepletionRate = template['fullnessDepletionRate'] || 1;
+    },
+    addTurnHunger: function() {
+        // Remove the standard depletion points
+        this.modifyFullnessBy(-this._fullnessDepletionRate);
+    },
+    modifyFullnessBy: function(points) {
+        this._fullness = this._fullness + points;
+        if (this._fullness <= 0) {
+            this.kill("You have died of starvation!");
+        } else if (this._fullness > this._maxFullness) {
+            this.kill("You choke and die!");
+        }
+    },
+    getHungerState: function() {
+        // Fullness points per percent of max fullness
+        var perPercent = this._maxFullness / 100;
+        // 5% of max fullness or less = starving
+        if (this._fullness <= perPercent * 5) {
+            return 'Starving';
+        // 25% of max fullness or less = hungry
+        } else if (this._fullness <= perPercent * 25) {
+            return 'Hungry';
+        // 95% of max fullness or more = oversatiated
+        } else if (this._fullness >= perPercent * 95) {
+            return 'Oversatiated';
+        // 75% of max fullness or more = full
+        } else if (this._fullness >= perPercent * 75) {
+            return 'Full';
+        // Anything else = not hungry
+        } else {
+            return 'Not Hungry';
+        }
+    }
+};
+
+Game.EntityMixins.CorpseDropper = {
+    name: 'CorpseDropper',
+    init: function(template) {
+        // Chance of dropping a cropse (out of 100).
+        this._corpseDropRate = template['corpseDropRate'] || 100;
+    },
+    tryDropCorpse: function() {
+        if (Math.round(Math.random() * 100) < this._corpseDropRate) {
+            // Create a new corpse item and drop it.
+            this._map.addItem(this.getX(), this.getY(), this.getZ(),
+                Game.ItemRepository.create('corpse', {
+                    name: this._name + ' corpse',
+                    foreground: this._foreground
+                }));
         }
     }
 };

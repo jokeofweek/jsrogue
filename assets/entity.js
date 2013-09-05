@@ -1,57 +1,17 @@
 Game.Entity = function(properties) {
     properties = properties || {};
-    // Call the glyph's construtor with our set of properties
-    Game.Glyph.call(this, properties);
+    // Call the dynamic glyph's construtor with our set of properties
+    Game.DynamicGlyph.call(this, properties);
     // Instantiate any properties from the passed object
-    this._name = properties['name'] || '';
     this._x = properties['x'] || 0;
     this._y = properties['y'] || 0;
     this._z = properties['z'] || 0;
     this._map = null;
-    // Create an object which will keep track what mixins we have
-    // attached to this entity based on the name property
-    this._attachedMixins = {};
-    // Create a similar object for groups
-    this._attachedMixinGroups = {};
-    // Setup the object's mixins
-    var mixins = properties['mixins'] || [];
-    for (var i = 0; i < mixins.length; i++) {
-        // Copy over all properties from each mixin as long
-        // as it's not the name or the init property. We
-        // also make sure not to override a property that
-        // already exists on the entity.
-        for (var key in mixins[i]) {
-            if (key != 'init' && key != 'name' && !this.hasOwnProperty(key)) {
-                this[key] = mixins[i][key];
-            }
-        }
-        // Add the name of this mixin to our attached mixins
-        this._attachedMixins[mixins[i].name] = true;
-        // If a group name is present, add it
-        if (mixins[i].groupName) {
-            this._attachedMixinGroups[mixins[i].groupName] = true;
-        }
-        // Finally call the init function if there is one
-        if (mixins[i].init) {
-            mixins[i].init.call(this, properties);
-        }
-    }
+    this._alive = true;
 };
-// Make entities inherit all the functionality from glyphs
-Game.Entity.extend(Game.Glyph);
+// Make entities inherit all the functionality from dynamic glyphs
+Game.Entity.extend(Game.DynamicGlyph);
 
-Game.Entity.prototype.hasMixin = function(obj) {
-    // Allow passing the mixin itself or the name / group name as a string
-    if (typeof obj === 'object') {
-        return this._attachedMixins[obj.name];
-    } else {
-        return this._attachedMixins[obj] || this._attachedMixinGroups[obj];
-    }
-};
-
-Game.Entity.prototype.setName = function(name) {
-    this._name = name;
-};
 Game.Entity.prototype.setX = function(x) {
     this._x = x;
 };
@@ -76,9 +36,6 @@ Game.Entity.prototype.setPosition = function(x, y, z) {
     if (this._map) {
         this._map.updateEntityPosition(this, oldX, oldY, oldZ);
     }
-};
-Game.Entity.prototype.getName = function() {
-    return this._name;
 };
 Game.Entity.prototype.getX = function() {
     return this._x;
@@ -153,4 +110,26 @@ Game.Entity.prototype.tryMove = function(x, y, z, map) {
         return false;
     }
     return false;
+};
+Game.Entity.prototype.isAlive = function() {
+    return this._alive;
+};
+Game.Entity.prototype.kill = function(message) {
+    // Only kill once!
+    if (!this._alive) {
+        return;
+    }
+    this._alive = false;
+    if (message) {
+        Game.sendMessage(this, message);
+    } else {
+        Game.sendMessage(this, "You have died!");
+    }
+
+    // Check if the player died, and if so call their act method to prompt the user.
+    if (this.hasMixin(Game.EntityMixins.PlayerActor)) {
+        this.act();
+    } else {
+        this.getMap().removeEntity(this);
+    }
 };
