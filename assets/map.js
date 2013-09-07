@@ -29,6 +29,13 @@ Game.Map = function(tiles, player) {
             this.addItemAtRandomPosition(Game.ItemRepository.createRandom(), z);
         }
     }
+    // Add weapons and armor to the map in random positions and floors
+    var templates = ['dagger', 'sword', 'staff', 
+        'tunic', 'chainmail', 'platemail'];
+    for (var i = 0; i < templates.length; i++) {
+        this.addItemAtRandomPosition(Game.ItemRepository.create(templates[i]),
+            Math.floor(this._depth * Math.random()));
+    }
     // Setup the explored array
     this._explored = new Array(this._depth);
     this._setupExploredArray();
@@ -193,9 +200,11 @@ Game.Map.prototype.removeEntity = function(entity) {
     }
 };
 
-Game.Map.prototype.updateEntityPosition = function(entity, oldX, oldY, oldZ) {
-    // Delete the old key if it is the same entity and we have old positions.
-    if (oldX) {
+Game.Map.prototype.updateEntityPosition = function(
+    entity, oldX, oldY, oldZ) {
+    // Delete the old key if it is the same entity
+    // and we have old positions.
+    if (typeof oldX === 'number') {
         var oldKey = oldX + ',' + oldY + ',' + oldZ;
         if (this._entities[oldKey] == entity) {
             delete this._entities[oldKey];

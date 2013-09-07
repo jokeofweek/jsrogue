@@ -9,7 +9,8 @@ Game.PlayerTemplate = {
     mixins: [Game.EntityMixins.PlayerActor,
              Game.EntityMixins.Attacker, Game.EntityMixins.Destructible,
              Game.EntityMixins.InventoryHolder, Game.EntityMixins.FoodConsumer,
-             Game.EntityMixins.Sight, Game.EntityMixins.MessageRecipient]
+             Game.EntityMixins.Sight, Game.EntityMixins.MessageRecipient,
+             Game.EntityMixins.Equipper]
 };
 
 // Create our central entity repository
