@@ -1,5 +1,6 @@
 // Player template
 Game.PlayerTemplate = {
+    name: 'human (you)',
     character: '@',
     foreground: 'white',
     maxHp: 40,

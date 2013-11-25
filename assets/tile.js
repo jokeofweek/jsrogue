@@ -7,6 +7,7 @@ Game.Tile = function(properties) {
     this._diggable = properties['diggable'] || false;
     this._blocksLight = (properties['blocksLight'] !== undefined) ?
         properties['blocksLight'] : true;
+    this._description = properties['description'] || '';
 };
 // Make tiles inherit all the functionality from glyphs
 Game.Tile.extend(Game.Glyph);
@@ -21,41 +22,50 @@ Game.Tile.prototype.isDiggable = function() {
 Game.Tile.prototype.isBlockingLight = function() {
     return this._blocksLight;
 };
+Game.Tile.prototype.getDescription = function() {
+    return this._description;
+};
 
-Game.Tile.nullTile = new Game.Tile();
+Game.Tile.nullTile = new Game.Tile({description: '(unknown)'});
 Game.Tile.floorTile = new Game.Tile({
     character: '.',
     walkable: true,
-    blocksLight: false
+    blocksLight: false,
+    description: 'A cave floor'
 });
 Game.Tile.wallTile = new Game.Tile({
     character: '#',
     foreground: 'goldenrod',
-    diggable: true
+    diggable: true,
+    description: 'A cave wall'
 });
 Game.Tile.stairsUpTile = new Game.Tile({
     character: '<',
     foreground: 'white',
     walkable: true,
-    blocksLight: false
+    blocksLight: false,
+    description: 'A rock staircase leading upwards'
 });
 Game.Tile.stairsDownTile = new Game.Tile({
     character: '>',
     foreground: 'white',
     walkable: true,
-    blocksLight: false
+    blocksLight: false,
+    description: 'A rock staircase leading downwards'
 });
 Game.Tile.holeToCavernTile = new Game.Tile({
     character: 'O',
     foreground: 'white',
     walkable: true,
-    blocksLight: false
+    blocksLight: false,
+    description: 'A great dark hole in the ground'
 });
 Game.Tile.waterTile = new Game.Tile({
     character: '~',
     foreground: 'blue',
     walkable: false,
-    blocksLight: false
+    blocksLight: false,
+    description: 'Murky blue water'
 });
 
 // Helper function
