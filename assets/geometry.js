@@ -9,22 +9,18 @@ Game.Geometry = {
         var e2;
 
         while (true) {
-            points.push({x: startX, y: endY});
+            points.push({x: startX, y: startY});
             if (startX == endX && startY == endY) {
                 break;
             }
-            e2 = 2 * err;
-            if (e2 > -dy) {
-                err = err - dy;
-                startX = startX + sx;
+            e2 = err * 2;
+            if (e2 > -dx) {
+                err -= dy;
+                startX += sx;
             }
-            if (startX == endX && startY == endY) {
-                points.push({x: startX, y: endY});
-                break;
-            }
-            if (e2 < dx) {
-                err = err + dx;
-                startY = startY + sy;
+            if (e2 < dx){
+                err += dx;
+                startY += sy;
             }
         }
 
