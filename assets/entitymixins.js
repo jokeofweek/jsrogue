@@ -220,7 +220,7 @@ Game.EntityMixins.Attacker = {
         // If no value was passed, default to 2.
         value = value || 2;
         // Add to the attack value.
-        this._attackValue += 2;
+        this._attackValue += value;
         Game.sendMessage(this, "You look stronger!");
     },
     attack: function(target) {
@@ -285,15 +285,15 @@ Game.EntityMixins.Destructible = {
         // If no value was passed, default to 2.
         value = value || 2;
         // Add to the defense value.
-        this._defenseValue += 2;
+        this._defenseValue += value;
         Game.sendMessage(this, "You look tougher!");
     },
     increaseMaxHp: function(value) {
         // If no value was passed, default to 10.
         value = value || 10;
         // Add to both max HP and HP.
-        this._maxHp += 10;
-        this._hp += 10;
+        this._maxHp += value;
+        this._hp += value;
         Game.sendMessage(this, "You look healthier!");
     },
     takeDamage: function(attacker, damage) {
@@ -351,7 +351,7 @@ Game.EntityMixins.Sight = {
         // If no value was passed, default to 1.
         value = value || 1;
         // Add to sight radius.
-        this._sightRadius += 1;
+        this._sightRadius += value;
         Game.sendMessage(this, "You are more aware of your surroundings!");
     },
     canSee: function(entity) {
